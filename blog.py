@@ -4,7 +4,7 @@ from functools import wraps
 import sqlite3
 
 # configuration
-DATABASE = 'blog.db'
+DATABASE_PATH = 'blog.db'
 USERNAME = 'admin'
 PASSWORD = 'admin'
 SECRET_KEY = '\x93\x1a\xc3\xf6\x1atC\x10U\xf1\xed\x95WdO\x90\xf74v\x0b\x10\x9a\xe8\xa1'
@@ -49,7 +49,12 @@ def logout():
 @app.route('/main')
 @login_required
 def main():
-    return render_template('main.html')
+    g.db = connect_db()
+    cur = g.db.execute('select * from posts')
+    posts = [dict(title=row[0], post=row[1]) for row in
+        cur.fetchall()]
+    g.db.close()
+    return render_template('main.html', posts=posts)
 
 if __name__ == '__main__':
     app.run(debug=True)
